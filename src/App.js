@@ -1,25 +1,57 @@
-import logo from './logo.svg';
-import './App.css';
+import "./index.css"
 
-function App() {
+import { Route, Switch } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+import CharactersList from "./components/CharactersList";
+import Movies from "./components/Movies";
+
+import axios from "axios";
+
+export default function App() {
+  const [movieInfo, setMovieInfo] = useState([]);
+
+  useEffect(() => {
+    loadMovies();
+  }, []);
+
+  const api = `https://swapi.dev/api/films/`;
+
+  const loadMovies = () => {
+    fetchMovies().then((data) => {
+      setMovieInfo(data.results);
+    });
+  };
+
+  const fetchMovies = () => {
+    return axios
+      .get(api)
+      .then(({ data }) => data)
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Switch>
+        <Route
+          exact
+          path="/"
+          render={() => {
+            return <Movies movies={movieInfo} />;
+          }}
+        />
+        {movieInfo.map((movie, idx) => (
+          <Route
+            path={`/${idx}/chars`}
+            render={() => {
+              return <CharactersList movieInfo={movie} />;
+            }}
+            key={movie.episode_id}
+          />
+        ))}
+      </Switch>
+    </>
   );
 }
-
-export default App;
